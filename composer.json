@@ -1,0 +1,24 @@
+{
+    "name": "jjsquady/smart-progressbar",
+    "authors": [
+        {
+            "name": "Jorge -jjsquady- Junior",
+            "email": "jjsquady@gmail.com"
+        },
+        {
+            "name": "zeusjammer",
+            "email": "zeusjammer@gmail.com"
+        }
+    ],
+    "scripts": {
+
+    },
+    "autoload": {
+        "psr-4": {
+            "Utils\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "5.7.*"
+    }
+}
