@@ -13,13 +13,20 @@ namespace Utils;
  * Class ProgressBar
  * @package Utils
  */
-Class ProgressBar {
+use Utils\Support\ProgressBarTimer;
+use Utils\Support\ProgressTimer;
 
+/**
+ * Class ProgressBar
+ * @package Utils
+ */
+abstract class ProgressBar
+{
 
     /**
      * @var
      */
-    protected $progress; // 0 - 100
+    protected $progress;
 
     /**
      * @var int
@@ -41,42 +48,51 @@ Class ProgressBar {
      */
     protected $localization = [
         'remaining' => 'remaining',
-        'elapsed' => 'elapsed',
-        'sec' => 'sec.'
+        'elapsed'   => 'elapsed',
+        'sec'       => 'sec.'
     ];
 
     /**
      * @var
      */
-    private $_bars;
+    protected $bars;
 
     /**
      * @var
      */
-    private $_startTime;
+    protected $startTime;
 
     /**
      * @var
      */
-    private $_now;
+    protected $now;
 
     /**
      * @var int
      */
-    private $_barSize;
+    protected $barSize;
 
-    private $_percent;
+
+    /**
+     * @var
+     */
+    private $percent;
+    /**
+     * @var ProgressBarTimer
+     */
+    private $timer;
 
     /**
      * ProgressBar constructor.
      * @param $maxValue
      * @param string $description
      * @param int $barSize
+     * @param ProgressTimer|null $timer
      * @throws \Exception
      */
-    private function __construct($maxValue, $description = '', $barSize = 30)
+    private function __construct($maxValue, $description = '', $barSize = 30, ProgressTimer $timer = null)
     {
-        if (! is_integer($maxValue)) {
+        if (!is_integer($maxValue)) {
             throw new \Exception("maxValue needs to be an integer.");
         }
 
@@ -84,7 +100,9 @@ Class ProgressBar {
 
         $this->description = $description;
 
-        $this->_barSize = $barSize;
+        $this->barSize = $barSize;
+
+        $this->timer = $this->makeTimer($timer);
     }
 
     /**
@@ -121,10 +139,9 @@ Class ProgressBar {
      */
     public function update($curValue)
     {
-
         $this->curValue = $this->validateCurrentValue($curValue);
 
-        $this->updateTime();
+        $this->timer->update();
 
         return $this;
     }
@@ -140,7 +157,7 @@ Class ProgressBar {
 
         $this->curValue = $this->validateCurrentValue($this->curValue);
 
-        $this->updateTime();
+        $this->timer->update();
 
         return $this;
     }
@@ -148,12 +165,7 @@ Class ProgressBar {
     /**
      * @return string
      */
-    public function render()
-    {
-        $this->_bars = floor(($this->_percent/100) * $this->_barSize);
-
-        return $this->updateBar() . $this->updateValue() . $this->updateEta($this->_now, $this->_startTime);
-    }
+    abstract public function render();
 
     /**
      * @return int
@@ -171,11 +183,82 @@ Class ProgressBar {
         return $this->curValue;
     }
 
+    /**
+     * @return mixed
+     */
     public function getProgressPercentage()
     {
-        return $this->_percent;
+        return $this->percent;
     }
 
+    /**
+     *
+     */
+    protected function updatePercentage()
+    {
+        $this->percent = intval(($this->curValue / $this->maxValue) * 100);
+    }
+
+    /**
+     * @return string
+     */
+    protected function displayBar()
+    {
+        $this->bars = floor(($this->percent / 100) * $this->barSize);
+
+        $output = "\r[";
+
+        $output .= str_repeat("=", $this->bars);
+
+        $output .= ($this->bars < $this->barSize) ? ">" : "=";
+
+        $output .= str_repeat(" ", $this->barSize - $this->bars);
+
+        $output .= "]";
+
+        return $output;
+    }
+
+    /**
+     * @return string
+     */
+    protected function displayProgress()
+    {
+        return " ({$this->percent}%) {$this->curValue}/{$this->maxValue} {$this->description}";
+    }
+
+
+    /**
+     * @return string
+     */
+    protected function displayEta()
+    {
+        $output = " {$this->localization['remaining']}: ";
+
+        $eta = number_format($this->timer->remaining($this->curValue));
+
+        $output .= "{$eta} {$this->localization['sec']} ";
+
+        $output .= "{$this->localization['elapsed']}: " . number_format($this->timer->elapsed());
+
+        $output .= " {$this->localization['sec']}";
+
+        return $output;
+    }
+
+    protected function makeTimer(ProgressTimer $timer = null)
+    {
+        if (isset($timer)) {
+            return $timer;
+        }
+
+        return new ProgressBarTimer($this->maxValue);
+    }
+
+    /**
+     * @param $curValue
+     * @return int
+     */
     private function validateCurrentValue($curValue)
     {
         if ($curValue >= $this->maxValue) {
@@ -192,78 +275,5 @@ Class ProgressBar {
 
         return $this->curValue;
     }
-
-    private function updateTime()
-    {
-        static $start_time;
-
-        if(empty($start_time)) {
-            $start_time = time();
-        }
-
-        $this->_startTime = $start_time;
-
-        $this->_now = time();
-    }
-
-    private function updatePercentage()
-    {
-        $this->_percent = intval(($this->curValue / $this->maxValue) * 100);
-    }
-
-    /**
-     * @return string
-     */
-    private function updateBar()
-    {
-        $output = "\r[";
-
-        $output .= str_repeat("=", $this->_bars);
-
-        $output .= ($this->_bars < $this->_barSize) ? ">" : "=";
-
-        $output .= str_repeat(" ", $this->_barSize - $this->_bars);
-
-        $output .= "]";
-
-        return $output;
-    }
-
-    /**
-     * @return string
-     */
-    private function updateValue()
-    {
-        return " ({$this->_percent}%) {$this->curValue}/{$this->maxValue} {$this->description}";
-    }
-
-    /**
-     * @param $now
-     * @param $start_time
-     * @return string
-     */
-    private function updateEta($now, $start_time)
-    {
-        $elapsed = $now - $start_time;
-
-        $eta = number_format($this->calculateEta($elapsed));
-
-        return " {$this->localization['remaining']}: {$eta} {$this->localization['sec']} {$this->localization['elapsed']}: ". number_format($elapsed) . " {$this->localization['sec']}";
-    }
-
-    /**
-     * @param $elapsed
-     * @return float
-     */
-    private function calculateEta($elapsed)
-    {
-        $rate = $elapsed / $this->curValue;
-
-        $left = $this->maxValue - $this->curValue;
-
-        return round($rate * $left, 2);
-
-    }
-
 
 }
