@@ -27,6 +27,13 @@ echo $progressBar->update($currentLength)->render();
 echo $progressBar->increment($amountLength)->render();
 ```
 
+### Output
+
+```$php
+// the output render some like
+[======>         ] (25%) 2500/10000 Lines. Remaining 2 sec. Elapsed 5 sec.
+```
+
 Thats it! Thanks!
 
 Licence MIT.
