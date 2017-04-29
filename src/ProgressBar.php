@@ -20,7 +20,7 @@ use Utils\Support\ProgressTimer;
  * Class ProgressBar
  * @package Utils
  */
-abstract class ProgressBar
+abstract class ProgressBar implements ProgressBarInterface
 {
 
     /**
