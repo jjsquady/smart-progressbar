@@ -72,15 +72,15 @@ abstract class ProgressBar
      */
     protected $barSize;
 
-
     /**
      * @var
      */
-    private $percent;
+    protected $percent;
+
     /**
      * @var ProgressBarTimer
      */
-    private $timer;
+    protected $timer;
 
     /**
      * ProgressBar constructor.
@@ -198,53 +198,6 @@ abstract class ProgressBar
     protected function updatePercentage()
     {
         $this->percent = intval(($this->curValue / $this->maxValue) * 100);
-    }
-
-    /**
-     * @return string
-     */
-    protected function displayBar()
-    {
-        $this->bars = floor(($this->percent / 100) * $this->barSize);
-
-        $output = "\r[";
-
-        $output .= str_repeat("=", $this->bars);
-
-        $output .= ($this->bars < $this->barSize) ? ">" : "=";
-
-        $output .= str_repeat(" ", $this->barSize - $this->bars);
-
-        $output .= "]";
-
-        return $output;
-    }
-
-    /**
-     * @return string
-     */
-    protected function displayProgress()
-    {
-        return " ({$this->percent}%) {$this->curValue}/{$this->maxValue} {$this->description}";
-    }
-
-
-    /**
-     * @return string
-     */
-    protected function displayEta()
-    {
-        $output = " {$this->localization['remaining']}: ";
-
-        $eta = number_format($this->timer->remaining($this->curValue));
-
-        $output .= "{$eta} {$this->localization['sec']} ";
-
-        $output .= "{$this->localization['elapsed']}: " . number_format($this->timer->elapsed());
-
-        $output .= " {$this->localization['sec']}";
-
-        return $output;
     }
 
     protected function makeTimer(ProgressTimer $timer = null)
