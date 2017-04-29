@@ -1,4 +1,4 @@
-#Smart ProgressBar
+# Smart ProgressBar
 
 This a little study project to make a progressbar more smarty :D
 
@@ -6,7 +6,7 @@ The first goal was create a ConsoleProgressBar, that make a more
 easier see a task progress.
 
 
-###Instalation
+### Instalation
 
 ```
 via composer:
@@ -14,7 +14,7 @@ via composer:
 composer require jjsquady/smart-progressbar
 ```
 
-###Usage
+### Usage
 
 ```
 $someLength = 10000;
