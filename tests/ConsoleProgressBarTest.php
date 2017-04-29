@@ -10,6 +10,7 @@ namespace Utils;
 
 
 use PHPUnit\Framework\TestCase;
+use Utils\Support\ProgressBarTimer;
 
 class ConsoleProgressBarTest extends TestCase
 {
@@ -22,7 +23,7 @@ class ConsoleProgressBarTest extends TestCase
     public function test_if_throws_maxvalue_exception()
     {
         $this->expectException(\Exception::class);
-        
+
         ConsoleProgressBar::init('0');
     }
 
@@ -68,5 +69,10 @@ class ConsoleProgressBarTest extends TestCase
         $progbar = ConsoleProgressBar::init(20)->localization(['remaining' => 'Tempo restante'])->update(10);
 
         $this->assertContains("Tempo restante", $progbar->render());
+    }
+
+    public function test_if_accepts_progress_timer_injection()
+    {
+        $this->assertInstanceOf(ConsoleProgressBar::class, ConsoleProgressBar::init(0,'',30, new ProgressBarTimer(50)));
     }
 }

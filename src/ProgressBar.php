@@ -109,11 +109,12 @@ abstract class ProgressBar
      * @param $maxValue
      * @param string $description
      * @param int $barSize
+     * @param ProgressTimer $timer
      * @return static
      */
-    public static function init($maxValue, $description = '', $barSize = 30)
+    public static function init($maxValue, $description = '', $barSize = 30, ProgressTimer $timer = null)
     {
-        $instance = new static($maxValue, $description, $barSize);
+        $instance = new static($maxValue, $description, $barSize, $timer);
 
         return $instance;
     }
