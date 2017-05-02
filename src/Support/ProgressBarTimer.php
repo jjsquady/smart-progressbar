@@ -40,13 +40,9 @@ class ProgressBarTimer implements ProgressTimer
      */
     public function update()
     {
-        static $_startTime;
-
-        if (empty($_startTime)) {
-            $_startTime = time();
+        if (empty($this->startTime)) {
+            $this->startTime = time();
         }
-
-        $this->startTime = $_startTime;
 
         $this->now = time();
     }
